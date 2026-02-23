@@ -1,0 +1,7 @@
+name: biobert
+tokenizer: ./models/biobert
+model_path: ./models/biobert
+dtype: float32
+trust_remote_code: false
+num_labels: 2  # For binary classification, adjust as needed
+task_type: SEQ_CLS
