@@ -4,3 +4,6 @@ Test
 
 
 '''
+
+class Test:
+    pass
