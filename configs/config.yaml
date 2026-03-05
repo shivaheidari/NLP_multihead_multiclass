@@ -1,0 +1,16 @@
+data:
+  train_csv: "data/processed/train.csv"
+  val_csv:   "data/processed/val.csv"
+  batch_size: 32
+  max_length: 128
+
+model:
+  encoder_name: "dmis-lab/biobert-base-cased-v1.1"
+  num_classes:
+    modality: 5
+    vendor: 4
+    series_type: 10
+    plane: 4
+    acquisition: 3
+    body: 8
+    contrast: 3
