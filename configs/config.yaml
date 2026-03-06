@@ -3,6 +3,14 @@ data:
   val_csv:   "data/processed/val.csv"
   batch_size: 32
   max_length: 128
+  label_cols:
+    - label_modality
+    - label_vendor
+    - label_series_type
+    - label_plane
+    - label_acquisition
+    - label_body
+    - label_contrast
 
 model:
   encoder_name: "dmis-lab/biobert-base-cased-v1.1"
