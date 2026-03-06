@@ -1,9 +1,0 @@
-'''
-Test
-
-
-
-'''
-
-class Test:
-    pass
