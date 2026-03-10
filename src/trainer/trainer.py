@@ -1,118 +1,163 @@
-from typing import Dict, Any, Optional
+
+from typing import Dict, Any
+
+import os
 import torch
 from torch.utils.data import DataLoader
-from transformers import Trainer, TrainingArguments, DataCollatorWithPadding
-from ..models.base import BaseModel
-from ..peft.base import BasePEFT
 
 
-class FineTuneTrainer:
-    """Trainer class for fine-tuning models with PEFT strategies."""
+def build_optimizer(cfg: Dict[str, Any], model: torch.nn.Module) -> torch.optim.Optimizer:
+    """Create AdamW optimizer with different LRs for encoder and heads."""
+    training_cfg = cfg["training"]
 
-    def __init__(self,
-                 model: BaseModel,
-                 peft_strategy: Optional[BasePEFT] = None,
-                 training_config: Optional[Dict[str, Any]] = None):
-        self.model = model
-        self.peft_strategy = peft_strategy
-        self.training_config = training_config or {}
-        self.trainer: Optional[Trainer] = None
-        self.is_prepared = False
+    encoder_lr = training_cfg["encoder_lr"]
+    head_lr = training_cfg["head_lr"]
+    weight_decay = training_cfg.get("weight_decay", 0.0)
 
-    def prepare_for_training(self, train_dataset=None, eval_dataset=None) -> None:
-        """Prepare the model and trainer for training."""
-        if self.model.model is None:
-            raise RuntimeError("Model not loaded. Call model.load_model() first.")
+    # split params: encoder vs heads
+    encoder_params = list(model.encoder.parameters())
+    head_params = []
 
-        # Apply PEFT if specified
-        if self.peft_strategy is not None:
-            print(f"Applying {self.peft_strategy.__class__.__name__}...")
-            self.model.model = self.peft_strategy.apply_peft(self.model.model)
+    head_params += list(model.modality_head.parameters())
+    head_params += list(model.vendor_head.parameters())
+    head_params += list(model.series_type_head.parameters())
+    head_params += list(model.plane_head.parameters())
+    head_params += list(model.acq_head.parameters())
+    head_params += list(model.body_head.parameters())
+    head_params += list(model.contrast_head.parameters())
 
-        # Prepare model for training
-        self.model.prepare_for_training()
+    optimizer = torch.optim.AdamW(
+        [
+            {"params": encoder_params, "lr": encoder_lr},
+            {"params": head_params,    "lr": head_lr},
+        ],
+        weight_decay=weight_decay,
+    )
+    return optimizer
 
-        # Create training arguments
-        training_args = TrainingArguments(
-            output_dir=self.training_config.get('output_dir', './outputs'),
-            num_train_epochs=self.training_config.get('num_train_epochs', 3),
-            per_device_train_batch_size=self.training_config.get('per_device_train_batch_size', 8),
-            per_device_eval_batch_size=self.training_config.get('per_device_eval_batch_size', 8),
-            warmup_steps=self.training_config.get('warmup_steps', 500),
-            weight_decay=self.training_config.get('weight_decay', 0.01),
-            logging_dir=self.training_config.get('logging_dir', './logs'),
-            logging_steps=self.training_config.get('logging_steps', 10),
-            evaluation_strategy=self.training_config.get('evaluation_strategy', 'steps'),
-            eval_steps=self.training_config.get('eval_steps', 500),
-            save_steps=self.training_config.get('save_steps', 500),
-            save_total_limit=self.training_config.get('save_total_limit', 3),
-            load_best_model_at_end=self.training_config.get('load_best_model_at_end', True),
-            metric_for_best_model=self.training_config.get('metric_for_best_model', 'eval_loss'),
-            greater_is_better=self.training_config.get('greater_is_better', False),
-            fp16=self.training_config.get('fp16', True),
-            gradient_checkpointing=self.training_config.get('gradient_checkpointing', False),
-        )
 
-        # Create data collator
-        data_collator = DataCollatorWithPadding(tokenizer=self.model.tokenizer)
+def train_one_epoch(
+    model: torch.nn.Module,
+    dataloader: DataLoader,
+    optimizer: torch.optim.Optimizer,
+    device: torch.device,) -> float:
+    
+    
+    model.train()
+    total_loss = 0.0
+    num_batches = 0
 
-        # Create trainer
-        self.trainer = Trainer(
-            model=self.model.model,
-            args=training_args,
-            train_dataset=train_dataset,
-            eval_dataset=eval_dataset,
-            tokenizer=self.model.tokenizer,
-            data_collator=data_collator,
-        )
+    for batch in dataloader:
+        batch = {k: v.to(device) for k, v in batch.items()}
 
-        self.is_prepared = True
-        print("Trainer prepared for training")
+        outputs = model(**batch)
+        loss = outputs["loss"]
 
-    def train(self) -> None:
-        """Start training."""
-        if not self.is_prepared:
-            raise RuntimeError("Trainer not prepared. Call prepare_for_training() first.")
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 
-        print("Starting training...")
-        self.trainer.train()
-        print("Training completed")
+        total_loss += loss.item()
+        num_batches += 1
 
-    def evaluate(self, eval_dataset=None) -> Dict[str, float]:
-        """Evaluate the model."""
-        if not self.is_prepared:
-            raise RuntimeError("Trainer not prepared. Call prepare_for_training() first.")
+    return total_loss / max(num_batches, 1)
 
-        print("Evaluating model...")
-        if eval_dataset is not None:
-            results = self.trainer.evaluate(eval_dataset=eval_dataset)
-        else:
-            results = self.trainer.evaluate()
 
-        print(f"Evaluation results: {results}")
-        return results
+@torch.no_grad()
+def evaluate(
+    model: torch.nn.Module,
+    dataloader: DataLoader,
+    device: torch.device,
+) -> Dict[str, float]:
+    """Very simple evaluation: per-head accuracy + mean accuracy."""
+    model.eval()
 
-    def save_model(self, path: str) -> None:
-        """Save the trained model."""
-        if not self.is_prepared:
-            raise RuntimeError("Trainer not prepared. Call prepare_for_training() first.")
+    correct = {
+        "modality": 0,
+        "vendor": 0,
+        "series_type": 0,
+        "plane": 0,
+        "acquisition": 0,
+        "body": 0,
+        "contrast": 0,
+    }
+    total = 0
 
-        if self.peft_strategy is not None and self.peft_strategy.is_peft_applied():
-            self.peft_strategy.save_peft_model(self.model.model, path)
-        else:
-            self.model.save_model(path)
+    for batch in dataloader:
+        batch = {k: v.to(device) for k, v in batch.items()}
+        outputs = model(**batch)
 
-        print(f"Model saved to: {path}")
+        # predictions
+        pred_modality    = outputs["logits_modality"].argmax(dim=1)
+        pred_vendor      = outputs["logits_vendor"].argmax(dim=1)
+        pred_series_type = outputs["logits_series_type"].argmax(dim=1)
+        pred_plane       = outputs["logits_plane"].argmax(dim=1)
+        pred_acquisition = outputs["logits_acquisition"].argmax(dim=1)
+        pred_body        = outputs["logits_body"].argmax(dim=1)
+        pred_contrast    = outputs["logits_contrast"].argmax(dim=1)
 
-    def get_training_info(self) -> Dict[str, Any]:
-        """Get information about the training setup."""
-        peft_info = {}
-        if self.peft_strategy is not None:
-            peft_info = self.peft_strategy.get_peft_info()
+        # labels
+        labels_modality    = batch["labels_modality"]
+        labels_vendor      = batch["labels_vendor"]
+        labels_series_type = batch["labels_series_type"]
+        labels_plane       = batch["labels_plane"]
+        labels_acquisition = batch["labels_acquisition"]
+        labels_body        = batch["labels_body"]
+        labels_contrast    = batch["labels_contrast"]
 
-        return {
-            'model_info': self.model.get_model_info(),
-            'peft_info': peft_info,
-            'training_config': self.training_config,
-            'is_prepared': self.is_prepared
-        }
+        batch_size = labels_modality.size(0)
+        total += batch_size
+
+        correct["modality"]    += (pred_modality    == labels_modality).sum().item()
+        correct["vendor"]      += (pred_vendor      == labels_vendor).sum().item()
+        correct["series_type"] += (pred_series_type == labels_series_type).sum().item()
+        correct["plane"]       += (pred_plane       == labels_plane).sum().item()
+        correct["acquisition"] += (pred_acquisition == labels_acquisition).sum().item()
+        correct["body"]        += (pred_body        == labels_body).sum().item()
+        correct["contrast"]    += (pred_contrast    == labels_contrast).sum().item()
+
+    acc = {name + "_acc": correct[name] / total for name in correct}
+    acc["mean_accuracy"] = sum(acc.values()) / len(correct)
+    return acc
+
+
+def fit(
+    cfg: Dict[str, Any],
+    model: torch.nn.Module,
+    datamodule,
+    device: torch.device,
+) -> None:
+    """
+    Full training loop:
+    - builds train/val dataloaders from datamodule
+    - builds optimizer
+    - runs epochs with train + eval
+    - saves best model state_dict
+    """
+    training_cfg = cfg["training"]
+
+    datamodule.setup()
+    train_loader = datamodule.train_dataloader()
+    val_loader   = datamodule.val_dataloader()
+
+    optimizer = build_optimizer(cfg, model)
+
+    num_epochs = training_cfg["epochs"]
+    best_val = None
+    best_state_dict = None
+
+    for epoch in range(1, num_epochs + 1):
+        train_loss = train_one_epoch(model, train_loader, optimizer, device)
+        val_metrics = evaluate(model, val_loader, device)
+        val_primary = val_metrics["mean_accuracy"]
+
+        print(f"Epoch {epoch}: train_loss={train_loss:.4f}, val_mean_acc={val_primary:.4f}")
+
+        if best_val is None or val_primary > best_val:
+            best_val = val_primary
+            best_state_dict = {k: v.cpu() for k, v in model.state_dict().items()}
+
+    if best_state_dict is not None:
+        output_dir = cfg["paths"]["output_dir"]
+        os.makedirs(output_dir, exist_ok=True)
+        torch.save(best_state_dict, os.path.join(output_dir, "pytorch_model.bin"))

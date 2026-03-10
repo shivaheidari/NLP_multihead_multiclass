@@ -22,3 +22,12 @@ model:
     acquisition: 3
     body: 8
     contrast: 3
+    
+training:
+  epochs: 5
+  encoder_lr: 2e-5
+  head_lr: 5e-5
+  weight_decay: 0.01
+
+paths:
+  output_dir: "outputs/models/biobert_multitask"
