@@ -1,6 +1,10 @@
 import torch
 from transformers import AutoModel
 
+import sys 
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from src.models.biobert_multitask import BioBertMultiHead
 
 
