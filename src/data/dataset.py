@@ -1,3 +1,12 @@
+"""
+Dataset utilities for multi-head, multi-class classification tasks.
+
+This module defines the DicomText dataset class, which wraps a pandas DataFrame
+containing text and multiple label columns for use with PyTorch DataLoader.
+
+Classes:
+    DicomText: A torch.utils.data.Dataset for handling text and multiple label fields.
+"""
 from torch.utils.data import Dataset
 
 class DicomText(Dataset):
