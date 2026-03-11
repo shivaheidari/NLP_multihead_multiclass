@@ -3,6 +3,10 @@ import yaml
 import torch
 from transformers import AutoTokenizer, AutoModel
 
+import sys 
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from src.data import DicomDataModule
 from src.models.biobert_multitask import BioBertMultiHead
 from src.training.trainer import fit
