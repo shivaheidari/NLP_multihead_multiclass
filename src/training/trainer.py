@@ -10,9 +10,9 @@ def build_optimizer(cfg: Dict[str, Any], model: torch.nn.Module) -> torch.optim.
     """Create AdamW optimizer with different LRs for encoder and heads."""
     training_cfg = cfg["training"]
 
-    encoder_lr = training_cfg["encoder_lr"]
-    head_lr = training_cfg["head_lr"]
-    weight_decay = training_cfg.get("weight_decay", 0.0)
+    encoder_lr = float(training_cfg["encoder_lr"])
+    head_lr = float(training_cfg["head_lr"])
+    weight_decay = float(training_cfg.get("weight_decay", 0.0))
 
     # split params: encoder vs heads
     encoder_params = list(model.encoder.parameters())
