@@ -1,3 +1,8 @@
+"""
+    Handles loading CSVs, building DicomText datasets, and wrapping them
+    in DataLoaders with the DicomCollator.
+    Expects cfg['data'] to contain: train_csv, val_csv, batch_size, max_length.
+    """
 import pandas as pd
 from torch.utils.data import DataLoader
 from transformers import PreTrainedTokenizerBase
@@ -7,11 +12,7 @@ from .collate import DicomCollator
 
 
 class DicomDataModule:
-    """
-    Handles loading CSVs, building DicomText datasets, and wrapping them
-    in DataLoaders with the DicomCollator.
-    Expects cfg['data'] to contain: train_csv, val_csv, batch_size, max_length.
-    """
+   
 
     def __init__(self, cfg: dict, tokenizer: PreTrainedTokenizerBase):
         data_cfg = cfg["data"]
@@ -26,15 +27,15 @@ class DicomDataModule:
         self.collator = None
 
     def setup(self):
-        # Load dataframes
+       
         train_df = pd.read_csv(self.train_csv)
         val_df   = pd.read_csv(self.val_csv)
 
-        # Create Dataset objects
+        
         self.train_dataset = DicomText(train_df)
         self.val_dataset   = DicomText(val_df)
 
-        # Shared collator
+        
         self.collator = DicomCollator(
             tokenizer=self.tokenizer,
             max_length=self.max_length,
