@@ -1,2 +1,2 @@
-text,modality,vendor,series_type,plane,acquisition,body,contrast
-short merge text ...,MR,GE,FLAIR,AX,2D,brain,with
+text,label_modality,label_vendor,label_series_type,label_plane,label_acquisition,label_body,label_contrast
+short merge text ...,1,2,2,1,1,2,1
