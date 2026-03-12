@@ -2,6 +2,9 @@ import argparse
 import yaml
 import torch
 from transformers import AutoTokenizer, AutoModel
+import json
+from pathlib import Path
+
 
 import sys 
 import os
@@ -10,6 +13,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from src.data import DicomDataModule
 from src.models.biobert_multitask import BioBertMultiHead
 from src.training.trainer import fit
+
+CUDA_LAUNCH_BLOCKING=1
 
 
 def main(cfg_path: str):
@@ -21,8 +26,15 @@ def main(cfg_path: str):
     tokenizer = AutoTokenizer.from_pretrained(cfg["model"]["encoder_name"])
     datamodule = DicomDataModule(cfg, tokenizer)
 
+    processed_dir = Path(cfg["data"]["processed_dir"])
+
+    with open(processed_dir / "label_info.json") as f:
+         label_info = json.load(f)
+
+    num_classes = label_info["num_classes"]  # dict head -> int
+
     encoder = AutoModel.from_pretrained(cfg["model"]["encoder_name"])
-    model = BioBertMultiHead(encoder=encoder, num_classes_dict=cfg["model"]["num_classes"])
+    model = BioBertMultiHead(encoder=encoder, num_classes_dict=num_classes)
     model.to(device)
 
     fit(cfg, model, datamodule, device)

@@ -6,6 +6,10 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+train.csv
+val.csv
+test.csv
+table.csv
 
 .env
 venv/
@@ -17,3 +21,6 @@ env/
 *.pth
 *.bin
 *.ckpt
+
+dataset/
+
