@@ -61,7 +61,7 @@ def evaluate(model, device, test_loader, heads):
             attention_mask = batch["attention_mask"].to(device)
 
             outputs = model(input_ids=input_ids, attention_mask=attention_mask)
-            
+
             logits_dict = {
                 "modality":    outputs["logits_modality"],
                 "vendor":      outputs["logits_vendor"],
@@ -105,7 +105,7 @@ def main():
     results = evaluate(model, device, test_loader, heads)
 
     print("Test metrics per head:")
-    for head, m in results.items():
+    for head, m in results.items():   
         print(f"Head: {head}")
         for k, v in m.items():
             if k == "confusion_matrix":
@@ -114,6 +114,18 @@ def main():
                     print("   ", row)
             else:
                 print(f"  {k}: {v:.4f}")
+
+    for head, m in results.items():
+
+
+        with open(f"outputs/{head}.txt", "w+") as f:
+            for k, v in m.items():
+                if k == "confusion_matrix":
+                    f.write(f"{k}\n")
+                    for row in v:
+                        f.write(f"{row}\n")
+                else:
+                    f.write(f"{k}: {v}\n")
 
 
 if __name__ == "__main__":
