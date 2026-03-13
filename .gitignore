@@ -2,6 +2,12 @@
 env/
 base_models/
 outputs/
+
+__pycache__/
+.env
+env/
+.ipynb_checkpoints/
+.ipynb_checkpoints
 __pycache__/
 *.pyc
 *.pyo
@@ -11,11 +17,8 @@ val.csv
 test.csv
 table.csv
 
-.env
-venv/
-env/
 
-.ipynb_checkpoints
+
 
 *.pt
 *.pth
