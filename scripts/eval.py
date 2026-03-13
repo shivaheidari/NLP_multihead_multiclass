@@ -9,9 +9,9 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.data import DicomDataModule  
-from src.models import MultiHeadModel 
+from src.models.BioBertMultiHead import BioBertMultiHead 
 from src.metrics.classification import MultiHeadMetrics
-
+from transformers import AutoModel, AutoTokenizer
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -35,18 +35,18 @@ def build_model(cfg, label_info):
     id2label = label_info["id2label"]                # optional, for logging
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    model = MultiHeadModel(
-        backbone_name=cfg["model"]["backbone_name"],
-        num_classes=num_classes,
-        id2label=id2label,                           # if your model uses it
+    model = BioBertMultiHead(
+        encoder=AutoModel.from_pretrained(cfg["model"]["encoder_name"]),
+        num_classes_dict=num_classes
     )
     model.to(device)
     return model, device
 
 
 def build_test_loader(cfg):
-    dm = DicomDataModule(cfg)
-    dm.setup("test")
+    tokenizer = AutoTokenizer.from_pretrained(cfg["model"]["encoder_name"])
+    dm = DicomDataModule(cfg, tokenizer=tokenizer)
+    dm.setup()
     return dm.test_dataloader()
 
 
@@ -57,12 +57,30 @@ def evaluate(model, device, test_loader, heads):
 
     with torch.no_grad():
         for batch in test_loader:
-            # adjust to your batch structure
             input_ids = batch["input_ids"].to(device)
             attention_mask = batch["attention_mask"].to(device)
-            labels_dict = {h: batch[f"label_{h}"].to(device) for h in heads}
 
-            logits_dict = model(input_ids=input_ids, attention_mask=attention_mask)
+            outputs = model(input_ids=input_ids, attention_mask=attention_mask)
+            
+            logits_dict = {
+                "modality":    outputs["logits_modality"],
+                "vendor":      outputs["logits_vendor"],
+                "series_type": outputs["logits_series_type"],
+                "plane":       outputs["logits_plane"],
+                "acquisition": outputs["logits_acquisition"],
+                "body":        outputs["logits_body"],
+                "contrast":    outputs["logits_contrast"],
+            }
+
+            labels_dict = {
+                "modality":    batch["labels_modality"].to(device),
+                "vendor":      batch["labels_vendor"].to(device),
+                "series_type": batch["labels_series_type"].to(device),
+                "plane":       batch["labels_plane"].to(device),
+                "acquisition": batch["labels_acquisition"].to(device),
+                "body":        batch["labels_body"].to(device),
+                "contrast":    batch["labels_contrast"].to(device),
+            }
 
             metrics.update_batch(logits_dict, labels_dict)
 

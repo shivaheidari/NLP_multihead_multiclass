@@ -17,9 +17,6 @@ val.csv
 test.csv
 table.csv
 
-
-
-
 *.pt
 *.pth
 *.bin
@@ -33,3 +30,6 @@ copies/fake_data_gen.py
 data/processed/label_info.json
 
 data/processed/label_maps.json
+src/__pycache__/__init__.cpython-310.pyc
+src/__pycache__/__init__.cpython-310.pyc
+src/data/__pycache__/collate.cpython-310.pyc

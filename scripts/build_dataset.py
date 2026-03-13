@@ -1,4 +1,8 @@
-# scripts/build_dataset.py
+'''
+
+to run this:
+python scripts/build_dataset.py --config configs/config.yaml
+'''
 import argparse
 import yaml
 import json
@@ -22,11 +26,6 @@ def main(cfg_path: str):
 
     
     raw_df = pd.read_csv(raw_cfg["file"])
-
-    # (Optional) build "text" column here from raw fields
-    # raw_df["text"] = ...
-
-    # 2. Split into train / test / val
     test_size = raw_cfg.get("test_size", 0.1)
     val_size  = raw_cfg.get("val_size", 0.1)
 

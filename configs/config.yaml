@@ -20,7 +20,8 @@ data:
     - label_contrast
 
 model:
-  encoder_name: "dmis-lab/biobert-base-cased-v1.1"
+  encoder_name: "base_models/biobert"
+  
 training:
   epochs: 5
   encoder_lr: 2e-5
