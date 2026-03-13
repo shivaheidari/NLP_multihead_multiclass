@@ -24,3 +24,9 @@ env/
 
 dataset/
 
+
+copies/fake_data_gen.py
+
+data/processed/label_info.json
+
+data/processed/label_maps.json
