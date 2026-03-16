@@ -17,12 +17,14 @@ class MultiHeadPredictor:
         preds = predictor.predict(["series description"])
     """
 
-    def __init__(self, model_dir: str, device: str | None = None, max_length: int = 128):
+    def __init__(self, model_dir: str, label_info_path:str,  device: str | None = None, max_length: int = 128):
         self.model_dir = Path(model_dir)
+        self.label_info_path = Path(label_info_path)
         self.max_length = max_length
+    
 
         # 1. Load label info (num_classes, id2label)
-        with open(self.model_dir / "label_info.json") as f:
+        with open(self.label_info_path / "label_info.json") as f:
             label_info = json.load(f)
         self.num_classes = label_info["num_classes"]   # dict[str, int]
         self.id2label = label_info["id2label"]         # dict[str, dict[str,int]] or similar
@@ -49,7 +51,7 @@ class MultiHeadPredictor:
         self.model.eval()
 
     def _load_checkpoint(self):
-        ckpt_path = self.model_dir / "model.pt"
+        ckpt_path = self.model_dir / "pytorch_model.bin"
         if not ckpt_path.exists():
             raise FileNotFoundError(f"Checkpoint not found at {ckpt_path}")
         ckpt = torch.load(ckpt_path, map_location=self.device)
@@ -71,14 +73,16 @@ class MultiHeadPredictor:
                 input_ids=enc["input_ids"],
                 attention_mask=enc["attention_mask"],
             )
-            logits = outputs["logits"] 
+           
+            logits = {k: v for k, v in outputs.items() if k.startswith("logits_")}
 
         preds: List[Dict[str, str]] = []
         batch_size = enc["input_ids"].size(0)
 
         for i in range(batch_size):
             head_labels: Dict[str, str] = {}
-            for head, head_logits in logits.items():
+            for head_key, head_logits in logits.items():
+                head = head_key.replace("logits_", "")
                 pred_id = torch.argmax(head_logits[i]).item()
                 id2lab = self.id2label[head]
                 if isinstance(next(iter(id2lab.keys())), str):
