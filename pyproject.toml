@@ -1,0 +1,22 @@
+[project]
+name = "metadata_normalizer"
+version = "0.1.0"
+description = "Multi-head DICOM metadata normalization with BioBERT"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Shiva Heydari" }]
+license = { text = "AHS" }
+dependencies = [
+  "torch",
+  "transformers",
+  "pandas",
+  "scikit-learn",
+  "matplotlib",
+]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

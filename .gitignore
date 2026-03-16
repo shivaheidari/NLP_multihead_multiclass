@@ -4,8 +4,9 @@ base_models/
 outputs/
 
 __pycache__/
-.env
-env/
+.venv/
+venv/
+
 .ipynb_checkpoints/
 .ipynb_checkpoints
 __pycache__/
@@ -33,3 +34,13 @@ data/processed/label_maps.json
 src/__pycache__/__init__.cpython-310.pyc
 src/__pycache__/__init__.cpython-310.pyc
 src/data/__pycache__/collate.cpython-310.pyc
+.venv/lib/python3.10/site-packages/cuda/pathfinder/_utils/find_site_packages_dll.py
+.gitignore
+src/metadata_normalizer.egg-info/dependency_links.txt
+.gitignore
+.gitignore
+src/metadata_normalizer.egg-info/top_level.txt
+src/metadata_normalizer.egg-info/SOURCES.txt
+src/metadata_normalizer.egg-info/requires.txt
+src/metadata_normalizer.egg-info/PKG-INFO
+sys
