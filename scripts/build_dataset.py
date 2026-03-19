@@ -1,5 +1,11 @@
 '''
 
+helper script for build dataset 
+what it is:
+what it does
+how to run
+example
+
 to run this:
 python scripts/build_dataset.py --config configs/config.yaml
 '''

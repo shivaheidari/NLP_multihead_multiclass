@@ -1,3 +1,11 @@
+"""
+    High-level inference wrapper.
+
+    Usage:
+        predictor = MultiHeadPredictor("outputs/models/biobert_multitask")
+        preds = predictor.predict(["series description"])
+    """
+
 from pathlib import Path
 from typing import List, Dict
 import json
@@ -9,13 +17,7 @@ from metadata_normalizer.inference.config_loader import load_project_config
 
 
 class MultiHeadPredictor:
-    """
-    High-level inference wrapper.
-
-    Usage:
-        predictor = MultiHeadPredictor("outputs/models/biobert_multitask")
-        preds = predictor.predict(["series description"])
-    """
+  
 
     def __init__(self, model_dir: str, label_info_path:str,  device: str | None = None, max_length: int = 128):
         self.model_dir = Path(model_dir)

@@ -20,6 +20,20 @@ class BioBertMultiHead(nn.Module):
         self.contrast_head    = nn.Linear(hidden_size, num_classes_dict["contrast"])
 
         self.loss_fct = nn.CrossEntropyLoss()
+        self.plane_class_weights: Optional[torch.Tensor] = None
+        self.body_class_weights: Optional[torch.Tensor] = None
+    
+    
+    def set_head_class_weights(
+        self,
+        plane_weights: Optional[torch.Tensor] = None,
+        body_weights: Optional[torch.Tensor] = None,
+           ):
+            if plane_weights is not None:
+                self.plane_class_weights = plane_weights
+            if body_weights is not None:
+                self.body_class_weights = body_weights
+
 
     def forward(
         self,
@@ -55,10 +69,24 @@ class BioBertMultiHead(nn.Module):
             loss = loss + self.loss_fct(logits_modality,    labels_modality)
             loss = loss + self.loss_fct(logits_vendor,      labels_vendor)
             loss = loss + self.loss_fct(logits_series_type, labels_series_type)
-            loss = loss + self.loss_fct(logits_plane,       labels_plane)
+
+            plane_loss_fct = (
+                nn.CrossEntropyLoss(weight=self.plane_class_weights)
+                if self.plane_class_weights is not None
+                else self.loss_fct
+            )
+            loss = loss + plane_loss_fct(logits_plane, labels_plane)
+
             loss = loss + self.loss_fct(logits_acquisition, labels_acquisition)
-            loss = loss + self.loss_fct(logits_body,        labels_body)
-            loss = loss + self.loss_fct(logits_contrast,    labels_contrast)
+
+            body_loss_fct = (
+                nn.CrossEntropyLoss(weight=self.body_class_weights)
+                if self.body_class_weights is not None
+                else self.loss_fct
+            )
+            loss = loss + body_loss_fct(logits_body, labels_body)
+
+            loss = loss + self.loss_fct(logits_contrast, labels_contrast)
 
         return {
             "loss": loss,

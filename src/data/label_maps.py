@@ -1,3 +1,14 @@
+
+
+"""
+    Holds num_classes and optional id2label mappings for each task.
+    Task names are derived from label column names by stripping 'label_'.
+    Assumes labels in df are already integer-encoded starting from 0.
+    """
+
+
+
+
 import json
 import pandas as pd
 from pathlib import Path
@@ -5,12 +16,6 @@ from typing import Dict, List
 
 
 class LabelMaps:
-    """
-    Holds num_classes and optional id2label mappings for each task.
-    Task names are derived from label column names by stripping 'label_'.
-    Assumes labels in df are already integer-encoded starting from 0.
-    """
-
     def __init__(
         self,
         num_classes: Dict[str, int],

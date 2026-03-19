@@ -160,4 +160,4 @@ def fit(
     if best_state_dict is not None:
         output_dir = cfg["paths"]["output_dir"]
         os.makedirs(output_dir, exist_ok=True)
-        torch.save(best_state_dict, os.path.join(output_dir, "pytorch_model.bin"))
+        torch.save(best_state_dict, os.path.join(output_dir, cfg["training"]["model_name"]))

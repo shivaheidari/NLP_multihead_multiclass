@@ -1,4 +1,13 @@
-# scripts/eval.py
+'''
+helper script for build eval
+what it is:
+what it does
+how to run
+example
+
+to run this:
+python scripts/build_dataset.py --config configs/config.yaml
+'''
 import argparse
 import json
 from pathlib import Path
@@ -9,7 +18,7 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.data import DicomDataModule  
-from src.models.BioBertMultiHead import BioBertMultiHead 
+from src.models.biobert_multitask import BioBertMultiHead 
 from src.metrics.classification import MultiHeadMetrics
 from transformers import AutoModel, AutoTokenizer
 

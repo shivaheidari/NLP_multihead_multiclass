@@ -1,3 +1,8 @@
+"""
+    Builds label2id / id2label mappings from a 'harmonized' column and
+    encodes each row into numeric labels per head.
+"""
+
 import re
 from typing import Dict, Set
 
@@ -5,10 +10,7 @@ import pandas as pd
 
 
 class TagEncoder:
-    """
-    Builds label2id / id2label mappings from a 'harmonized' column and
-    encodes each row into numeric labels per head.
-    """
+
 
     HEADS = ["modality", "vendor", "series_type", "plane", "acquisition", "body", "contrast"]
 

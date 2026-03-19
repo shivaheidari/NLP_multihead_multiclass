@@ -27,6 +27,7 @@ training:
   encoder_lr: 2e-5
   head_lr: 5e-5
   weight_decay: 0.01
+  model_name: "finetunedweighted.bin"
 
 paths:
   output_dir: "outputs/models/biobert_multitask"
