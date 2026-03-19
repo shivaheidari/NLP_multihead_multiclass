@@ -32,8 +32,8 @@ class MultiHeadPredictor:
         self.id2label = label_info["id2label"]         # dict[str, dict[str,int]] or similar
 
         # 2. Decide encoder name
-        cfg  = load_project_config()
-        encoder_name = cfg["model"]["encoder_name"]
+        self.cfg  = load_project_config()
+        encoder_name = self.cfg["model"]["encoder_name"]
 
         # 3. Setup device
         if device is not None:
@@ -53,7 +53,7 @@ class MultiHeadPredictor:
         self.model.eval()
 
     def _load_checkpoint(self):
-        ckpt_path = self.model_dir / "pytorch_model.bin"
+        ckpt_path = self.model_dir / self.cfg["training"]["model_name"]
         if not ckpt_path.exists():
             raise FileNotFoundError(f"Checkpoint not found at {ckpt_path}")
         ckpt = torch.load(ckpt_path, map_location=self.device)
