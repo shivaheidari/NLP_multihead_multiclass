@@ -1,14 +1,22 @@
-'''
+"""
+Helper script to build the dataset for multi-head multi-class classification.
 
-helper script for build dataset 
-what it is:
-what it does
-how to run
-example
 
-to run this:
-python scripts/build_dataset.py --config configs/config.yaml
-'''
+    A preprocessing and data splitting script for raw DICOM text data.
+
+    1. Reads raw data from the path specified in the configuration.
+    2. Splits the data into train, validation, and test sets based on config ratios.
+    3. Fits the TagEncoder strictly on the training set to prevent data leakage.
+    4. Transforms all data splits into encoded numeric labels.
+    5. Saves the processed CSV files and label mapping dictionaries (JSON) 
+       to the configured output directory for training and inference.
+
+How to run:
+    python scripts/build_dataset.py --config <path_to_config.yaml>
+
+Example:
+    python scripts/build_dataset.py --config configs/config.yaml
+"""
 import argparse
 import yaml
 import json

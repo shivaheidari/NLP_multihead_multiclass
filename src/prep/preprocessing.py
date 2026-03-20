@@ -1,5 +1,6 @@
 """
-    Builds label2id / id2label mappings from a 'harmonized' column and
+    This module provides:
+    label2id / id2label mappings from a 'harmonized' column and
     encodes each row into numeric labels per head.
 """
 
@@ -10,9 +11,42 @@ import pandas as pd
 
 
 class TagEncoder:
+    """
+    TagEncoder class for preprocessing the multihead-multiclass calssification 
+    provides label2id and id2label per each head. 
+    List of heads are 
+    modality,
+    vendor,
+    series_type,
+    plane,
+    acquisition,
+    body,
+    contrast
 
+    Args:
+        None
 
+    Attributes:
+        HEADS (List[str]): List of classification heads.
+
+    Methods:
+    fit: accepts dataframe obj
+    transform: creates preprocessed dataframe
+
+    Usage:
+        # 1. Initialize the TagEncoder
+        encoder = TagEncoder()
+        
+        #2. Fit on a DataFrame
+            encoder.fit(df)
+        
+        #3. Transform a DataFrame
+        df = encoder.transform(df)
+    
+    """
+    
     HEADS = ["modality", "vendor", "series_type", "plane", "acquisition", "body", "contrast"]
+    
 
     def __init__(self):
         self.label2id: Dict[str, Dict[str, int]] = {}
@@ -20,7 +54,7 @@ class TagEncoder:
 
     @staticmethod
     def _parse_harmonized(harmonized: str) -> Dict[str, str]:
-        """Parse a harmonized string like '<MR><GE><FLAIR><AX>...' into a dict per head."""
+       
         tokens = re.findall(r"<([^>]+)>", harmonized or "")
         expected_slots = len(TagEncoder.HEADS)
         if len(tokens) < expected_slots:
@@ -38,9 +72,7 @@ class TagEncoder:
   
 
     def fit(self, df: pd.DataFrame) -> None:
-        """
-        Build label2id and id2label from the 'harmonized' column of df.
-        """
+
         labels_per_head: Dict[str, Set[str]] = {h: set() for h in self.HEADS}
 
         for harmonized in df["harmonized"]:
@@ -48,11 +80,11 @@ class TagEncoder:
             for head, value in slots.items():
                 labels_per_head[head].add(value)
 
-        # ensure 'none' exists for all heads
+        # ensures 'none' exists for all heads
         for head in labels_per_head:
             labels_per_head[head].add("none")
 
-        # build mappings
+        # builds mappings
         for head, values in labels_per_head.items():
             sorted_values = sorted(values)
             l2i = {v: i for i, v in enumerate(sorted_values)}
@@ -65,10 +97,7 @@ class TagEncoder:
         return {head: len(self.label2id[head]) for head in self.HEADS}
 
     def encode_row(self, harmonized: str) -> Dict[str, int]:
-        """
-        Encode a single harmonized string into integer labels per head.
-        Assumes fit() has been called.
-        """
+       
         slots = self._parse_harmonized(harmonized)
         return {
             head: self.label2id[head][slots.get(head, "none")]
@@ -76,12 +105,9 @@ class TagEncoder:
         }
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Add label_* columns to df based on the harmonized column and the learned mappings.
-        """
+      
         df = df.copy()
 
-        # apply encode_row row-wise
         encoded = df["harmonized"].apply(self.encode_row)
 
         for head in self.HEADS:

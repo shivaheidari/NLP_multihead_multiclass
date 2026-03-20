@@ -1,10 +1,25 @@
 """
-    High-level inference wrapper.
+Predictor Module for multi-head multi class classification of dicom metadata.
 
-    Usage:
-        predictor = MultiHeadPredictor("outputs/models/biobert_multitask")
-        preds = predictor.predict(["series description"])
-    """
+This module provides functionality to load the fine-tuned model and label_info file 
+to predict the classes per each head. 
+
+Usage:
+    from metadata_normalizer import MultiHeadPredictor
+
+    # 1. Initialize the predictor
+    predictor = MultiHeadPredictor(
+        model_dir="outputs/models/biobert_multitask",
+        label_info_path="data/processed"
+    )
+
+    # 2. Provide a list of texts (e.g., DICOM descriptions)
+    texts = ["Sagittal T1-weighted brain with contrast"]
+    
+    # 3. Get predictions
+    predictions = predictor.predict(texts)
+    print(predictions)
+"""
 
 from pathlib import Path
 from typing import List, Dict
@@ -17,6 +32,16 @@ from metadata_normalizer.inference.config_loader import load_project_config
 
 
 class MultiHeadPredictor:
+    """
+    Predictor class for multi-head classification of text data.
+
+    Args:
+        model_dir (str): Directory containing the fine-tuned model checkpoint.
+        label_info_path (str): Directory containing the 'label_info.json' mapping file.
+        device (str | None, optional): The device to run inference on ('cuda' or 'cpu'). 
+            Defaults to None (auto-detects GPU if available).
+        max_length (int, optional): Maximum sequence length for the tokenizer. Defaults to 128.
+    """
   
 
     def __init__(self, model_dir: str, label_info_path:str,  device: str | None = None, max_length: int = 128):
@@ -29,7 +54,7 @@ class MultiHeadPredictor:
         with open(self.label_info_path / "label_info.json") as f:
             label_info = json.load(f)
         self.num_classes = label_info["num_classes"]   # dict[str, int]
-        self.id2label = label_info["id2label"]         # dict[str, dict[str,int]] or similar
+        self.id2label = label_info["id2label"]         # dict[str, dict[str,int]]
 
         # 2. Decide encoder name
         self.cfg  = load_project_config()
@@ -53,6 +78,7 @@ class MultiHeadPredictor:
         self.model.eval()
 
     def _load_checkpoint(self):
+        """Internal method to locate and load the model weights from the configured path."""
         ckpt_path = self.model_dir / self.cfg["training"]["model_name"]
         if not ckpt_path.exists():
             raise FileNotFoundError(f"Checkpoint not found at {ckpt_path}")
@@ -62,6 +88,16 @@ class MultiHeadPredictor:
         self.model.load_state_dict(state_dict)
 
     def predict(self, texts: List[str]) -> List[Dict[str, str]]:
+        """
+        Predict class labels for a list of input texts across all configured heads.
+
+        Args:
+            texts (List[str]): A list of input text strings to be classified.
+
+        Returns:
+            List[Dict[str, str]]: A list of dictionaries where each dictionary corresponds to 
+                an input text and maps each classification head to its predicted string label.
+        """
         enc = self.tokenizer(
             texts,
             padding=True,

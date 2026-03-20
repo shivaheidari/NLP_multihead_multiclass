@@ -1,3 +1,15 @@
+"""
+Create AdamW optimizer with different LRs for encoder and heads recived from config.yaml file
+calls dataloader, train. 
+
+ in the training loop 
+    - builds train/val dataloaders from datamodule
+    - builds optimizer
+    - runs epochs with train + eval
+    - saves best model state_dict
+
+the output is a finetuned model in .bin format
+  """
 
 from typing import Dict, Any
 
@@ -7,7 +19,7 @@ from torch.utils.data import DataLoader
 
 
 def build_optimizer(cfg: Dict[str, Any], model: torch.nn.Module) -> torch.optim.Optimizer:
-    """Create AdamW optimizer with different LRs for encoder and heads."""
+  
     training_cfg = cfg["training"]
 
     encoder_lr = float(training_cfg["encoder_lr"])
@@ -69,7 +81,6 @@ def evaluate(
     dataloader: DataLoader,
     device: torch.device,
 ) -> Dict[str, float]:
-    """Very simple evaluation: per-head accuracy + mean accuracy."""
     model.eval()
 
     correct = {
@@ -127,13 +138,7 @@ def fit(
     datamodule,
     device: torch.device,
 ) -> None:
-    """
-    Full training loop:
-    - builds train/val dataloaders from datamodule
-    - builds optimizer
-    - runs epochs with train + eval
-    - saves best model state_dict
-    """
+    
     training_cfg = cfg["training"]
 
     datamodule.setup()

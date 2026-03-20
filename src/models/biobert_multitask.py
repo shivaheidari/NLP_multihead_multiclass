@@ -1,3 +1,9 @@
+"""
+BioBertMultiHead module uses pretrainde Biobert from Transformers library as an encoder.
+For each head, a fully connected neural network is used as a final layer.
+In the current project, two classes of 'body' and 'consrast' have imbalanced data.So, 
+we have used weights for each class. 
+"""
 from typing import Dict, Optional
 
 import torch
@@ -6,6 +12,31 @@ from transformers import PreTrainedModel
 
 
 class BioBertMultiHead(nn.Module):
+    """
+    BioBertMultiHead class that implements a multi-head classification model.
+    
+    This model uses a pre-trained transformer encoder (e.g., BioBERT) and attaches 
+    multiple linear heads for predicting different DICOM metadata attributes: 
+    modality, vendor, series_type, plane, acquisition, body, and contrast.
+    
+    Args:
+        encoder (PreTrainedModel): The pre-trained transformer model used as the base encoder.
+        num_classes_dict (Dict[str, int]): A dictionary mapping each classification 
+            head name to its corresponding number of classes.
+            
+    Attributes:
+        encoder (PreTrainedModel): The base transformer encoder.
+        modality_head (nn.Linear): Classification head for 'modality'.
+        vendor_head (nn.Linear): Classification head for 'vendor'.
+        series_type_head (nn.Linear): Classification head for 'series_type'.
+        plane_head (nn.Linear): Classification head for 'plane'.
+        acq_head (nn.Linear): Classification head for 'acquisition'.
+        body_head (nn.Linear): Classification head for 'body'.
+        contrast_head (nn.Linear): Classification head for 'contrast'.
+        loss_fct (nn.CrossEntropyLoss): Default cross entropy loss function.
+        plane_class_weights (Optional[torch.Tensor]): Class weights for the 'plane' head.
+        body_class_weights (Optional[torch.Tensor]): Class weights for the 'body' head.
+    """
     def __init__(self, encoder: PreTrainedModel, num_classes_dict: Dict[str, int]):
         super().__init__()
         self.encoder = encoder

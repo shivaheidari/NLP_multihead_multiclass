@@ -1,10 +1,25 @@
-'''
+"""
+Helper script to train the multi-head multi-class classification model.
 
-python scripts/train.py --config configs/config.yaml
+What it is:
+    A main training script that fine-tunes a pre-trained BioBERT model 
+    to predict 7 DICOM metadata attributes simultaneously.
 
-'''
+What it does:
+    1. Loads the project configuration and label metadata.
+    2. Initializes the tokenizer and prepares the DicomDataModule.
+    3. Initializes the BioBertMultiHead model.
+    4. Calculates and applies class weights for heavily imbalanced classes 
+       (e.g., 'plane' and 'body') based on the training dataset.
+    5. Executes the training loop (training and validation) and saves 
+       the best model checkpoint to the output directory.
 
+How to run:
+    python scripts/train.py --config <path_to_config.yaml>
 
+Example:
+    python scripts/train.py --config configs/config.yaml
+"""
 import argparse
 import yaml
 import torch

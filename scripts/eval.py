@@ -1,13 +1,23 @@
-'''
-helper script for build eval
-what it is:
-what it does
-how to run
-example
+"""
+Helper script to evaluate the trained multi-head multi-class classification model.
 
-to run this:
-python scripts/build_dataset.py --config configs/config.yaml
-'''
+What it is:
+    An evaluation script that tests a saved model checkpoint against the test dataset.
+
+What it does:
+    1. Loads the project configuration and label mappings.
+    2. Initializes the BioBertMultiHead model and loads the specified checkpoint weights.
+    3. Prepares the test dataloader using the DicomDataModule.
+    4. Runs inference on the test set and calculates metrics (Accuracy, F1, 
+       Precision, Recall, and Confusion Matrix) for all 7 classification heads.
+    5. Prints the results to the console and saves them to text files in the outputs directory.
+
+How to run:
+    python scripts/eval.py --config <path_to_config.yaml> --checkpoint <path_to_model_checkpoint>
+
+Example:
+    python scripts/eval.py --config configs/config.yaml --checkpoint outputs/models/biobert_multitask/finetunedweighted.bin
+"""
 import argparse
 import json
 from pathlib import Path

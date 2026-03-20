@@ -1,8 +1,19 @@
+"""
+Provides weights for those heads who has imbalanced classes.
+
+"""
 import numpy as np
 import numpy as np
 import torch
-
 def compute_class_weights(labels, num_classes):
+    """
+    Calculates classes weights for those heads who has imbalanced classes.
+    Args: 
+        labels
+        num_classes
+    Returns:
+        weights
+    """
     labels = np.array(labels)
     counts = np.bincount(labels, minlength=num_classes)
     total = counts.sum()

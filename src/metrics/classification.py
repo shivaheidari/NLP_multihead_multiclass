@@ -1,13 +1,16 @@
 """
-add 
+Metrics Module for multi-head multi class classification of dicom metadata.
 
+This module provides the results of the predictions based on classification metrics including:
+ accuracy_score,f1_score,precision_score,recall_score
+ it also provides the confusion metrics.
 
+Usage:
+    from metrics import MultiHeadMetrics
 """
 
 
 import torch
-
-
 from sklearn.metrics import (
     accuracy_score,
     f1_score,
@@ -16,7 +19,22 @@ from sklearn.metrics import (
     confusion_matrix,
 )
 
-class MultiHeadMetrics:
+class MultiHeadMetrics: 
+    """
+    Metrics class for multi-head classification of text data.
+    
+    Args:
+        heads (List[str]): List of classification heads.
+
+    Attributes:
+        heads (List[str]): List of classification heads.
+        _y_true (Dict[str, List[int]]): Dictionary to store true labels for each head.
+        _y_pred (Dict[str, List[int]]): Dictionary to store predicted labels for each head.
+
+    Methods:
+        reset(): Resets the metrics to their initial state.
+    """
+    
     def __init__(self, heads):
         self.heads = heads
         self.reset()
