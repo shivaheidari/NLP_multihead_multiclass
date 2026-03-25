@@ -3,8 +3,8 @@ Provides weights for those heads who has imbalanced classes.
 
 """
 import numpy as np
-import numpy as np
 import torch
+
 def compute_class_weights(labels, num_classes):
     """
     Calculates classes weights for those heads who has imbalanced classes.

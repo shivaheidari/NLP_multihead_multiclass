@@ -72,7 +72,10 @@ def main(cfg_path: str):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str, required=True)
+    parser = argparse.ArgumentParser(description="Trains a multi-head multi-class classification from prepared dataset with numerical class values", 
+                                     epilog="Example: python scripts/train.py --config configs/config.yaml")
+    parser.add_argument("--config", type=str, required=True,
+                        help="Path to YAML config file containg raw_data and data setting", 
+                        metavar="CONFIG_PATH")
     args = parser.parse_args()
     main(args.config)

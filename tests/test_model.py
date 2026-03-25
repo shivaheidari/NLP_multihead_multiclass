@@ -3,10 +3,9 @@ from transformers import AutoModel
 
 import sys 
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 from src.models.biobert_multitask import BioBertMultiHead
 
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 def test_biobert_multihead_forward_no_labels():
     encoder = AutoModel.from_pretrained("bert-base-uncased")

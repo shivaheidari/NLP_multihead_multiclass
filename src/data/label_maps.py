@@ -1,12 +1,12 @@
 
-
 """
-    Holds num_classes and optional id2label mappings for each task.
-    Task names are derived from label column names by stripping 'label_'.
-    Assumes labels in df are already integer-encoded starting from 0.
-    """
+Utilities for creating, storing, and loading label mappings for multi-task
+classification problems.
 
-
+This module provides the LabelMaps class, which manages the number of classes
+per task and optional id-to-label mappings, with support for construction from
+a pandas DataFrame and JSON serialization.
+"""
 
 
 import json
@@ -16,6 +16,14 @@ from typing import Dict, List
 
 
 class LabelMaps:
+    """
+    Container for label metadata in multi-task classification.
+
+    Stores the number of classes for each task and optional mappings from
+    class indices to label names. Provides helper methods to construct from
+    a DataFrame and to save/load mappings from disk.
+    """
+
     def __init__(
         self,
         num_classes: Dict[str, int],

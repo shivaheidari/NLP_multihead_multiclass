@@ -21,6 +21,7 @@ table.csv
 *.pth
 *.bin
 *.ckpt
+*.pyc
 
 dataset/
 
@@ -30,10 +31,7 @@ copies/fake_data_gen.py
 data/processed/label_info.json
 
 data/processed/label_maps.json
-src/__pycache__/__init__.cpython-310.pyc
-src/__pycache__/__init__.cpython-310.pyc
-src/data/__pycache__/collate.cpython-310.pyc
-.venv/lib/python3.10/site-packages/cuda/pathfinder/_utils/find_site_packages_dll.py
+
 
 src/metadata_normalizer.egg-info/dependency_links.txt
 
@@ -42,23 +40,4 @@ src/metadata_normalizer.egg-info/SOURCES.txt
 src/metadata_normalizer.egg-info/requires.txt
 src/metadata_normalizer.egg-info/PKG-INFO
 sys
-src/models/__pycache__/biobert_multitask.cpython-310.pyc
-src/models/__pycache__/__init__.cpython-310.pyc
-src/__pycache__/__init__.cpython-310.pyc
-src/models/__pycache__/biobert_multitask.cpython-310.pyc
-src/__pycache__/__init__.cpython-310.pyc
-src/__pycache__/__init__.cpython-310.pyc
-src/models/__pycache__/biobert_multitask.cpython-310.pyc
-src/models/__pycache__/biobert_multitask.cpython-310.pyc
-src/models/__pycache__/__init__.cpython-310.pyc
-src/data/__pycache__/dataset.cpython-310.pyc
-src/data/__pycache__/collate.cpython-310.pyc
-src/data/__pycache__/__init__.cpython-310.pyc
-src/__pycache__/__init__.cpython-310.pyc
-src/training/__pycache__/trainer.cpython-310.pyc
-src/__pycache__/__init__.cpython-310.pyc
-src/data/__pycache__/collate.cpython-310.pyc
-src/models/__pycache__/biobert_multitask.cpython-310.pyc
-src/models/__pycache__/__init__.cpython-310.pyc
-src/training/__pycache__/trainer.cpython-310.pyc
-src/training/__pycache__/trainer.cpython-310.pyc
+src/models/

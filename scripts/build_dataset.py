@@ -105,7 +105,12 @@ def main(cfg_path: str):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str, required=True)
+    parser = argparse.ArgumentParser(
+    description="Build dataset for multi-head multi-class classification from raw DICOM metadata.",
+    epilog="Example: python scripts/build_dataset.py --config configs/config.yaml"
+)
+    parser.add_argument("--config", type=str, required=True,
+                        metavar="CONFIG_PATH",
+                        help="Path to YAML config file containing raw_data and data settings")
     args = parser.parse_args()
     main(args.config)

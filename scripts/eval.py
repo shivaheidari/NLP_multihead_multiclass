@@ -33,7 +33,8 @@ from src.metrics.classification import MultiHeadMetrics
 from transformers import AutoModel, AutoTokenizer
 
 def parse_args():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Evaluates the model based on the test dataset in the config file", 
+                                     epilog="Example: python scripts/eval.py --config configs/config.yaml --checkpoint outputs/models/biobert_multitask/finetunedweighted.bin")
     parser.add_argument("--config", type=str, required=True, help="Path to YAML config.")
     parser.add_argument("--checkpoint", type=str, required=True, help="Path to model .pt/.ckpt.")
     return parser.parse_args()

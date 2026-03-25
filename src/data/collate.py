@@ -1,7 +1,38 @@
+"""
+DicomCollator module is used for tokenizing, embedding, padding, and max_length settings. 
+Attributes:
+        tokenizer: A Hugging Face tokenizer used to encode input text.
+        max_length (int): Maximum sequence length for tokenization. Sequences longer than
+            this will be truncated, and shorter ones will be padded.
+
+This module is callable for example: DicomCollator(texts, padding='max_size', max_length, return_tensors)
+
+it returns tokenized text with the labels for each category including:
+            label_modality,
+            "label_vendor",
+            "label_series_type",
+            "label_plane",
+            "label_acquisition",
+            "label_body",
+            "label_contrast",
+"""
 
 import torch
 
 class DicomCollator:
+    """
+    Data collator for batching DICOM-related text samples with multiple classification labels.
+
+    This collator tokenizes input text and aggregates multiple target labels into tensors,
+    making it suitable for multi-head / multi-task classification models (e.g., modality,
+    vendor, plane, etc.).
+
+    Attributes:
+        tokenizer: A Hugging Face tokenizer used to encode input text.
+        max_length (int): Maximum sequence length for tokenization. Sequences longer than
+            this will be truncated, and shorter ones will be padded.
+    """
+    
     def __init__(self, tokenizer, max_length: int):
         self.tokenizer = tokenizer
         self.max_length = max_length
